@@ -1,22 +1,26 @@
+import { useState } from "react";
 import { ID, KEY, USER } from "../components/Icons";
 import LoginInput from "../components/LoginInput";
 import LoginSeparator from "../components/LoginSeparator";
 import logo from "/staingram.png";
 
-const LoginPage = ({ setSessionId }) => {
+const LoginPage = ({ setSessionId, toast }) => {
+  const [isLoading, setLoading] = useState(false);
+
   const fetchSessionId = async (url, body) => {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams(body),
-    });
-    if (res.status === 200) {
-      return (await res.text()).replace(/"/g, "");
-    } else {
-      return null;
-    }
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams(body),
+      });
+      if (res.ok) {
+        return (await res.text()).replace(/"/g, "");
+      }
+    } catch (error) {}
+    return null;
   };
 
   const byCredentials = async (username, password) =>
@@ -31,6 +35,7 @@ const LoginPage = ({ setSessionId }) => {
     });
 
   const handleSubmit = async (event) => {
+    setLoading(true);
     event.preventDefault();
     const username = event.target[0].value;
     const password = event.target[1].value;
@@ -44,8 +49,18 @@ const LoginPage = ({ setSessionId }) => {
     if (sid) {
       setSessionId(sid);
     } else {
-      console.log("Login failed");
+      toast.error("Wrong password.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     }
+    setLoading(false);
   };
 
   return (
@@ -58,8 +73,8 @@ const LoginPage = ({ setSessionId }) => {
         <LoginInput icon={KEY} type="password" placeholder="Password" />
         <LoginSeparator />
         <LoginInput icon={ID} type="password" placeholder="Session ID" />
-        <button type="submit" className="btn mt-2 mb-9 text-white bg-sky-500">
-          Log in
+        <button type="submit" className="btn btn-info mt-2 mb-9 text-white" disabled={isLoading}>
+          {isLoading ? "Connecting..." : "Log in"}
         </button>
       </form>
     </div>

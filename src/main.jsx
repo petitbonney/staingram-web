@@ -5,6 +5,6 @@ import "./style.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App className="bg-lime-200" />
+    <App />
   </StrictMode>
 );
