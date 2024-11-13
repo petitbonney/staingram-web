@@ -4,20 +4,47 @@ import LoginSeparator from "../components/LoginSeparator";
 import logo from "/staingram.png";
 
 const LoginPage = ({ setSessionId }) => {
-  const getSessionId = (username, password) => {
-    return `${username}_${password}`;
+  const fetchSessionId = async (url, body) => {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams(body),
+    });
+    if (res.status === 200) {
+      return (await res.text()).replace(/"/g, "");
+    } else {
+      return null;
+    }
   };
 
-  const handleSubmit = (event) => {
+  const byCredentials = async (username, password) =>
+    await fetchSessionId(`${import.meta.env.VITE_API_URL}/auth/login`, {
+      username: username,
+      password: password,
+    });
+
+  const bySessionId = async (sid) =>
+    await fetchSessionId(`${import.meta.env.VITE_API_URL}/auth/login_by_sessionid`, {
+      sessionid: sid,
+    });
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const username = event.target[0].value;
     const password = event.target[1].value;
-    var sessionId = event.target[2].value;
-    if (username && password && !sessionId) {
-      sessionId = getSessionId(username, password);
+    var sid = event.target[2].value;
+    if (sid) {
+      sid = await bySessionId(sid);
     }
-    if (sessionId) {
-      setSessionId(sessionId);
+    if (!sid && username && password) {
+      sid = await byCredentials(username, password);
+    }
+    if (sid) {
+      setSessionId(sid);
+    } else {
+      console.log("Login failed");
     }
   };
 
