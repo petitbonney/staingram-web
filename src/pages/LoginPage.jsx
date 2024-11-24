@@ -4,35 +4,8 @@ import LoginInput from "../components/LoginInput";
 import LoginSeparator from "../components/LoginSeparator";
 import logo from "/staingram.png";
 
-const LoginPage = ({ setSessionId, toast }) => {
+const LoginPage = ({ loginByCredentials, loginBySessionId, setSid, toast }) => {
   const [isLoading, setLoading] = useState(false);
-
-  const fetchSessionId = async (url, body) => {
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams(body),
-      });
-      if (res.ok) {
-        return (await res.text()).replace(/"/g, "");
-      }
-    } catch (error) {}
-    return null;
-  };
-
-  const byCredentials = async (username, password) =>
-    await fetchSessionId(`${import.meta.env.VITE_API_URL}/auth/login`, {
-      username: username,
-      password: password,
-    });
-
-  const bySessionId = async (sid) =>
-    await fetchSessionId(`${import.meta.env.VITE_API_URL}/auth/login_by_sessionid`, {
-      sessionid: sid,
-    });
 
   const handleSubmit = async (event) => {
     setLoading(true);
@@ -41,15 +14,15 @@ const LoginPage = ({ setSessionId, toast }) => {
     const password = event.target[1].value;
     var sid = event.target[2].value;
     if (sid) {
-      sid = await bySessionId(sid);
+      sid = await loginBySessionId(sid);
     }
     if (!sid && username && password) {
-      sid = await byCredentials(username, password);
+      sid = await loginByCredentials(username, password);
     }
     if (sid) {
-      setSessionId(sid);
+      setSid(sid);
     } else {
-      toast.error("Wrong password.", {
+      toast.error("Wrong credentials.", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: false,
@@ -66,7 +39,7 @@ const LoginPage = ({ setSessionId, toast }) => {
   return (
     <div id="login-page" className="flex-col border border-gray-300 px-10">
       <div className="justify-center">
-        <img src={logo} className="logo mt-9 mb-3" alt="Vite logo" />
+        <img src={logo} className="logo mt-9 mb-3" />
       </div>
       <form onSubmit={handleSubmit} className="flex-col mt-6">
         <LoginInput icon={USER} type="text" placeholder="Username" />

@@ -4,17 +4,26 @@ import MainPage from "./pages/MainPage.jsx";
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { loginByCredentials, loginBySessionId } from "./utils/queries.jsx";
 
 const App = () => {
-  const [sessionId, setSessionId] = useState(localStorage.getItem("sessionId"));
-  useEffect(() => localStorage.setItem("sessionId", sessionId), [sessionId]);
+  const [sid, setSid] = useState(localStorage.getItem("sid") || "");
+
+  const logout = () => setSid("");
+
+  useEffect(() => localStorage.setItem("sid", sid), [sid]);
 
   return (
     <>
-      {sessionId == "null" ? (
-        <LoginPage setSessionId={setSessionId} toast={toast} />
+      {sid ? (
+        <MainPage sid={sid} logout={logout} toast={toast} />
       ) : (
-        <MainPage setSessionId={setSessionId} toast={toast} />
+        <LoginPage
+          loginByCredentials={loginByCredentials}
+          loginBySessionId={loginBySessionId}
+          setSid={setSid}
+          toast={toast}
+        />
       )}
       <ToastContainer className="justify-end" pauseOnFocusLoss={false} />
     </>
