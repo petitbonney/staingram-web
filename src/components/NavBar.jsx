@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchImage, fetchUserId, fetchUserInfo } from "../utils/queries";
 import logo from "/staingram.png";
 
-const NavBar = ({ sid, logout }) => {
+const NavBar = ({ sid, logout, setTarget }) => {
   const [me, setMe] = useState(JSON.parse(localStorage.getItem("me") || "{}"));
   const [profilePic, setProfilePic] = useState(null);
 
@@ -14,16 +14,22 @@ const NavBar = ({ sid, logout }) => {
 
   useEffect(() => {
     localStorage.setItem("me", JSON.stringify(me));
-    fetchImage(sid, me["profile_pic_url"], me["username"])
-      .then(URL.createObjectURL)
-      .then(setProfilePic);
+    fetchImage(sid, me.profile_pic_url, me.username).then(URL.createObjectURL).then(setProfilePic);
   }, [me]);
+
+  const search = (text) => {
+    if (isNaN(text)) {
+      fetchUserId(sid, text).then(setTarget);
+    } else {
+      setTarget(text);
+    }
+  };
 
   return (
     <div className="navbar bg-base-100">
       <div className="flex-1">
-        <a className="max-h-10 mt-2 cursor-pointer bg-gray-400">
-          <img src={logo} className="object-contain object-left" />
+        <a>
+          <img src={logo} className="max-h-12" />
         </a>
       </div>
       <div className="flex-none gap-2">
@@ -32,6 +38,9 @@ const NavBar = ({ sid, logout }) => {
             type="text"
             placeholder="Search"
             className="input input-bordered w-24 md:w-auto !outline-none"
+            onKeyDown={(e) =>
+              e.key === "Enter" && e.currentTarget.value && search(e.currentTarget.value)
+            }
           />
         </div>
 
