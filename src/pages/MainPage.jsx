@@ -9,9 +9,16 @@ const MainPage = ({ sid, logout }) => {
 
   useEffect(() => {
     if (target) {
-      fetchUserMedias(sid, target).then(userMedias => {
-        console.log(userMedias)
-        setMedias(userMedias)
+      fetchUserMedias(sid, target).then((userMedias) => {
+        const flatMedias = userMedias.flatMap((post) => {
+          if ("resources" in post && post.resources.length > 0) {
+            return post.resources.map((media) => Object.assign({}, post, media));
+          } else {
+            return [post];
+          }
+        });
+        console.log(flatMedias);
+        setMedias(flatMedias);
       });
     }
   }, [target]);
