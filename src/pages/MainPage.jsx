@@ -12,7 +12,9 @@ const MainPage = ({ sid, logout }) => {
       fetchUserMedias(sid, target).then((userMedias) => {
         const flatMedias = userMedias.flatMap((post) => {
           if ("resources" in post && post.resources.length > 0) {
-            return post.resources.map((media) => Object.assign({}, post, media));
+            return post.resources.map((media, i) =>
+              Object.assign({}, post, media, { id: post.id + "_" + i })
+            );
           } else {
             return [post];
           }
